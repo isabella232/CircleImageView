@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
@@ -55,6 +56,7 @@ public class CircleImageView extends ImageView {
     private final Paint mBitmapPaint = new Paint();
     private final Paint mBorderPaint = new Paint();
     private final Paint mFillPaint = new Paint();
+    private final Path mCirclePath = new Path();
 
     private int mBorderColor = DEFAULT_BORDER_COLOR;
     private int mBorderWidth = DEFAULT_BORDER_WIDTH;
@@ -140,12 +142,19 @@ public class CircleImageView extends ImageView {
             return;
         }
 
+        int padding = (getPaddingLeft() + getPaddingTop() + getPaddingRight() + getPaddingBottom()) / 4;
         if (mFillColor != Color.TRANSPARENT) {
-            canvas.drawCircle(mDrawableRect.centerX(), mDrawableRect.centerY(), mDrawableRadius, mFillPaint);
+            canvas.drawCircle(mDrawableRect.centerX(), mDrawableRect.centerY(), mDrawableRadius + padding, mFillPaint);
         }
-        canvas.drawCircle(mDrawableRect.centerX(), mDrawableRect.centerY(), mDrawableRadius, mBitmapPaint);
+
+        mCirclePath.reset();
+        mCirclePath.addCircle(mDrawableRect.centerX(), mDrawableRect.centerY(), mDrawableRadius + padding, Path.Direction.CW);
+        canvas.clipPath(mCirclePath);
+
+        canvas.drawRect(mBorderRect.centerX() - mBorderRadius, mBorderRect.centerY() - mBorderRadius,
+            mBorderRect.centerX() + mBorderRadius, mBorderRect.centerY() + mBorderRadius, mBitmapPaint);
         if (mBorderWidth > 0) {
-            canvas.drawCircle(mBorderRect.centerX(), mBorderRect.centerY(), mBorderRadius, mBorderPaint);
+            canvas.drawCircle(mBorderRect.centerX(), mBorderRect.centerY(), mBorderRadius + padding, mBorderPaint);
         }
     }
 
